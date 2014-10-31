@@ -4,7 +4,7 @@
    initiation(p);
 clock_t start = clock(), diff;
     
-    run(p->maxiter,p->threshold, r);
+    run(p->maxiter,p->threshold, r, p->period);
 
  
 

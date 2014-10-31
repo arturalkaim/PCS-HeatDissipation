@@ -9,9 +9,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
+#include <time.h>
 #include "run.h"
 #include "input.h"
-#include <time.h>
 
 #define DIRECT_N_CONST(condutivity) (sqrt(2)/(sqrt(2)+1))*(1-condutivity)
 #define DIAGONAL_N_CONST(condutivity) (1/(sqrt(2)+1))*(1-condutivity)
@@ -95,11 +96,17 @@ void print(int iter){
 
 
 void calcResoult(struct results*  r){
-    double min = tmax, max=tmin, average, aux;
+	//Compare with mat
+    double min = tKmax, max=tKmin, average=0, aux2, aux, abs = 0, absAux;
     int i,j;
     for (i = 0; i< N; i++) {
         for (j = 0; j< M; j++) {
+        	aux2 = matKth[i*M+j];
             aux = mat[i*M+j];
+            absAux = fabs(aux2-aux);
+            if(absAux > abs){
+            	abs = absAux;
+            }
             if (aux<min)
              {
                min = aux;
@@ -114,23 +121,35 @@ void calcResoult(struct results*  r){
     average = average/(N*M);
     r->tmin = min;
     r->tmax = max;
+    r->maxdiff = abs;
     r->tavg = average;
-    r->time = average*-1; 
+    r->time = average*-1;
+    tKmin = min;
+    tKmax = max;
+
+    //keep the matrix to keep the values.
+    memcpy(matKth, mat, N*M*sizeof(double));
+
 }
 
 
-void run(size_t iter,double thsl, struct results*  r){
+void run(size_t iter,double thsl, struct results*  r, int k){
     print(0);
     int i;
     for (i = 0; i< iter; i++) {
         mat = processCells(mat);
-        print(i);
+        //print(i);
+        if(i%k == 0){
+        	calcResoult(r);
+        	if( r->maxdiff < thsl)
+        		break;
+        }
     }
 
     calcResoult(r);
 
     
-    r->niter = iter;
+    r->niter = i;
     
 }
 
@@ -140,12 +159,16 @@ void initiation(const struct parameters* p){
     M = p->M;
     tmin = p->io_tmin;
     tmax = p->io_tmax;
+    tKmin = tmin;
+    tKmax = tmax;
     int range = abs(p->io_tmin) + abs(p->io_tmax);
 
     printf("%d  %d\n", N, M);
 
-    mat = (double*) calloc(N*M, sizeof(double*));
-    matAux = (double*) calloc(N*M, sizeof(double*));
+    mat = (double*) calloc(N*M, sizeof(double));
+    matAux = (double*) calloc(N*M, sizeof(double));
+    matKth = (double*) calloc(N*M, sizeof(double));
+
     pointerAux = mat;
     int i, j,k=0;
     for (i = 0; i< N; i++) {
@@ -153,5 +176,8 @@ void initiation(const struct parameters* p){
             mat[i*M+j] = p->tinit[k++]*(255/range);
         }
     }
+    memcpy(matKth, mat, N*M*sizeof(double));
+
+
 }
 

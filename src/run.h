@@ -11,8 +11,9 @@
 
 size_t N = 10, M = 5;
 double tmin, tmax;
-
-double * mat ;
-double * matAux ;
+double tKmin, tKmax;
+double * mat;
+double * matAux;
+double * matKth;
 double * pointerAux;
 #endif
