@@ -10,7 +10,9 @@
 #define Test1_main_h
 
 size_t N = 10, M = 5;
-double ** mat ;
-double ** init ;
-double ** cond ;
+double tmin, tmax;
+
+double * mat ;
+double * matAux ;
+double * pointerAux;
 #endif

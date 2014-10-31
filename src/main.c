@@ -119,8 +119,9 @@ void init(){
 
 int main(int argc, const char * argv[]) {
     init();
+	struct results r;    
     
-    run(91);
+  	r = run(struct parameters p);
 
     printf("Hello, World!\n");
     return 0;

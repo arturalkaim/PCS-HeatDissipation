@@ -11,40 +11,41 @@
 #include <math.h>
 #include "run.h"
 #include "input.h"
+#include <time.h>
 
 #define DIRECT_N_CONST(condutivity) (sqrt(2)/(sqrt(2)+1))*(1-condutivity)
 #define DIAGONAL_N_CONST(condutivity) (1/(sqrt(2)+1))*(1-condutivity)
 
 
 double U(int i, int j){
-    return mat[i==0?N-1:(i-1)][j]; //up
+    return mat[i==0?(N-1)*M+j:(i-1)*M+j]; //up i*M+j
 }
 
 double D(int i, int j){
-    return mat[(i+1)%N][j]; //down
+    return mat[((i+1)%N)*M+j]; //down
 }
 
 double L(int i, int j){
-    return mat[i][j==0?M-1:(j-1)]; //left
+    return mat[i*M + (j==0?M-1:(j-1))]; //left
 }
 
 double R(int i, int j){
-    return mat[i][(j+1)%M]; //right
+    return mat[i*M+((j+1)%M)]; //right
 }
 
 double RU(int i, int j){
-    return mat[i==0?N-1:(i-1)][(j+1)%M]; //right up - diagonal
+    return mat[i==0?(N-1)*M + ((j+1)%M):(i-1)*M + ((j+1)%M)]; //right up - diagonal
 }
 double RD(int i, int j){
-    return mat[(i+1)%N][(j+1)%M]; //right down - diagonal
+    return mat[((i+1)%N)*M + ((j+1)%M)]; //right down - diagonal
 }
 
 double LU(int i, int j){
-    return mat[i==0?N-1:(i-1)][j==0?M-1:(j-1)]; //left up - diagonal
+    return mat[i==0?(N-1)*M + (j==0?M-1:(j-1)) : (i-1)*M + (j==0?M-1:(j-1)) ]; //left up - diagonal
 }
 
 double LD(int i, int j){
-    return mat[(i+1)%N][j==0?M-1:(j-1)]; //left down - diagonal
+    return mat[((i+1)%N)*M + (j==0?M-1:(j-1))]; //left down - diagonal
 }
 
 
@@ -57,28 +58,24 @@ double nextValue(int i, int j){
     
     //printf("COND = %f\n", condutivity+DIRECT_N_CONST(condutivity)+DIAGONAL_N_CONST(condutivity));
     
-    return ((R(i,j) + L(i,j) + U(i,j) + D(i,j))/4)*DIRECT_N_CONST(condutivity)+((RU(i,j) + LU(i,j) + RD(i,j) + LD(i,j))/4)*DIAGONAL_N_CONST(condutivity)+mat[i][j]*(condutivity);
+    return ((R(i,j) + L(i,j) + U(i,j) + D(i,j))/4)*DIRECT_N_CONST(condutivity)+((RU(i,j) + LU(i,j) + RD(i,j) + LD(i,j))/4)*DIAGONAL_N_CONST(condutivity)+mat[i*M+j]*(condutivity);
     
     
 }
 
-double** processCells(double** in){
-    double ** Amat = (double**) calloc(N, sizeof(double*));
+double* processCells(double* in){
+
     int i, j;
-    for (i = 0; i< N; i++) {
-        Amat[i] = (double*) calloc(M, sizeof(double));
-    }
-    
     for (j = 0; j< M; j++) {
         for (i = 0; i< N; i++) {
-            Amat[i][j] = nextValue(i,j);
+            matAux[i*M+j] = nextValue(i,j);
         }
     }
-    
-    return Amat;
+    mat=matAux;
+    matAux=pointerAux;
+    pointerAux=mat;
+    return mat;
 }
-
-
 
 
 /*
@@ -89,12 +86,38 @@ void print(int iter){
     printf("\n\n%d \n",iter);
     for (i = 0; i< N; i++) {
         for (j = 0; j< M; j++) {
-            printf("%5.3f ", mat[i][j]);
+            printf("%5.3f ", mat[i*M+j]);
         }
         printf("\n");
     }
     
 }
+
+
+void calcResoult(struct results*  r){
+    double min = tmax, max=tmin, average, aux;
+    int i,j;
+    for (i = 0; i< N; i++) {
+        for (j = 0; j< M; j++) {
+            aux = mat[i*M+j];
+            if (aux<min)
+             {
+               min = aux;
+             } 
+             if (aux>max)
+             {
+               max = aux;
+             }
+             average += aux; 
+        }
+    }
+    average = average/(N*M);
+    r->tmin = min;
+    r->tmax = max;
+    r->tavg = average;
+    r->time = average*-1; 
+}
+
 
 void run(size_t iter,double thsl, struct results*  r){
     print(0);
@@ -104,29 +127,30 @@ void run(size_t iter,double thsl, struct results*  r){
         print(i);
     }
 
-    r->tmin = -10;
-    r->tmax = 90; 
-    r->tavg = 0.00345;
+    calcResoult(r);
+
+    
+    r->niter = iter;
+    
 }
 
 
 void initiation(const struct parameters* p){
     N = p->N;
     M = p->M;
-    
+    tmin = p->io_tmin;
+    tmax = p->io_tmax;
     int range = abs(p->io_tmin) + abs(p->io_tmax);
 
     printf("%d  %d\n", N, M);
 
-    mat = (double**) calloc(N, sizeof(double*));
-    int i, j,k;
-    
+    mat = (double*) calloc(N*M, sizeof(double*));
+    matAux = (double*) calloc(N*M, sizeof(double*));
+    pointerAux = mat;
+    int i, j,k=0;
     for (i = 0; i< N; i++) {
-        mat[i] = (double*) calloc(M, sizeof(double));
-    }
-    for (i = 0, k = 0; i< N; i++) {
         for (j = 0; j< M; j++) {
-            mat[i][j] = p->tinit[k++]*(255/range);
+            mat[i*M+j] = p->tinit[k++]*(255/range);
         }
     }
 }
