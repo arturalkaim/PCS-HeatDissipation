@@ -18,48 +18,34 @@
 #define DIAGONAL_N_CONST(condutivity) (1/(sqrt(2)+1))*(1-condutivity)
 
 
-double U(int i, int j){
-    return mat[i==0?(N-1)*M+j:(i-1)*M+j]; //up i*M+j
-}
-
-double D(int i, int j){
-    return mat[((i+1)%N)*M+j]; //down
-}
-
-double L(int i, int j){
-    return mat[i*M + (j==0?M-1:(j-1))]; //left
-}
-
-double R(int i, int j){
-    return mat[i*M+((j+1)%M)]; //right
-}
-
-double RU(int i, int j){
-    return mat[i==0?(N-1)*M + ((j+1)%M):(i-1)*M + ((j+1)%M)]; //right up - diagonal
-}
-double RD(int i, int j){
-    return mat[((i+1)%N)*M + ((j+1)%M)]; //right down - diagonal
-}
-
-double LU(int i, int j){
-    return mat[i==0?(N-1)*M + (j==0?M-1:(j-1)) : (i-1)*M + (j==0?M-1:(j-1)) ]; //left up - diagonal
-}
-
-double LD(int i, int j){
-    return mat[((i+1)%N)*M + (j==0?M-1:(j-1))]; //left down - diagonal
-}
+#define U(i, j) mat[i==0?(N-1)*M+j:(i-1)*M+j] //up i*M+j
 
 
+#define D(i, j) mat[((i+1)%N)*M+j] //down
+
+
+#define L(i, j) mat[i*M + (j==0?M-1:(j-1))] //left
+
+
+#define R(i, j) mat[i*M+((j+1)%M)] //right
+
+#define RU(i, j) mat[i==0?(N-1)*M + ((j+1)%M):(i-1)*M + ((j+1)%M)] //right up - diagonal
+
+#define RD(i, j) mat[((i+1)%N)*M + ((j+1)%M)] //right down - diagonal
+
+#define LU(i, j) mat[i==0?(N-1)*M + (j==0?M-1:(j-1)) : (i-1)*M + (j==0?M-1:(j-1)) ] //left up - diagonal
+
+#define LD(i, j) mat[((i+1)%N)*M + (j==0?M-1:(j-1))] //left down - diagonal
+
+
+//1.567000e+00
 /*
  calc the next value for the cell mat[i][j] depends on the surroundings
  now is just the average of the 4 direct cells, ignoring diagonals
  */
 double nextValue(int i, int j){
-    double condutivity=0.2;
-    
-    //printf("COND = %f\n", condutivity+DIRECT_N_CONST(condutivity)+DIAGONAL_N_CONST(condutivity));
-    
-    return ((R(i,j) + L(i,j) + U(i,j) + D(i,j))/4)*DIRECT_N_CONST(condutivity)+((RU(i,j) + LU(i,j) + RD(i,j) + LD(i,j))/4)*DIAGONAL_N_CONST(condutivity)+mat[i*M+j]*(condutivity);
+    double condty=conductivity[i*M+j];    
+    return ((R(i,j) + L(i,j) + U(i,j) + D(i,j))/4)*DIRECT_N_CONST(condty)+((RU(i,j) + LU(i,j) + RD(i,j) + LD(i,j))/4)*DIAGONAL_N_CONST(condty)+mat[i*M+j]*(condty);
     
     
 }
@@ -134,7 +120,7 @@ void calcResoult(struct results*  r){
 
 
 void run(size_t iter,double thsl, struct results*  r, int k){
-    print(0);
+    //print(0);
     int i;
     for (i = 0; i< iter; i++) {
         mat = processCells(mat);
@@ -168,7 +154,7 @@ void initiation(const struct parameters* p){
     mat = (double*) calloc(N*M, sizeof(double));
     matAux = (double*) calloc(N*M, sizeof(double));
     matKth = (double*) calloc(N*M, sizeof(double));
-
+    conductivity = (double*) calloc(N*M, sizeof(double));
     pointerAux = mat;
     int i, j,k=0;
     for (i = 0; i< N; i++) {
@@ -178,6 +164,11 @@ void initiation(const struct parameters* p){
     }
     memcpy(matKth, mat, N*M*sizeof(double));
 
+    for (i = 0; i< N; i++) {
+        for (j = 0; j< M; j++) {
+            conductivity[i*M+j] = p->conductivity[k++]*(255/range);
+        }
+    }
 
 }
 

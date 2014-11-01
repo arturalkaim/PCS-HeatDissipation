@@ -1,14 +1,17 @@
 
 
+initiation(p);
+clock_t srt = clock(), diff;
+time_t start, end;
+double elapsed;
+time(&start); 
 
-   initiation(p);
-clock_t start = clock(), diff;
-    
-    run(p->maxiter,p->threshold, r, p->period);
+run(p->maxiter,p->threshold, r, p->period);
 
- 
+time(&end);
+elapsed = difftime(end, start);
 
-diff = clock() - start;
+diff = clock() - srt;
 
 int msec = diff * 1000 / CLOCKS_PER_SEC;   
 r->time = msec/1000.0;

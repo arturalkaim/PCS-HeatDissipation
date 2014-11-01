@@ -16,4 +16,5 @@ double * mat;
 double * matAux;
 double * matKth;
 double * pointerAux;
+double * conductivity;
 #endif
