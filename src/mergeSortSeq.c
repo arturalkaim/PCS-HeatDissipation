@@ -32,11 +32,13 @@ TopDownMerge(A[], iBegin, iMiddle, iEnd, B[])
     // While there are elements in the left or right runs
     for (int j = iBegin; j < iEnd; j++) {
         // If left run head exists and is <= existing right run head.
-        if (i0 < iMiddle && (i1 >= iEnd || A[i0] <= A[i1]))
+        if (i0 < iMiddle && (i1 >= iEnd || A[i0] <= A[i1])){
             B[j] = A[i0];
             i0 = i0 + 1;
-        else
+        }
+        else{
             B[j] = A[i1];
-            i1 = i1 + 1;    }
+            i1 = i1 + 1; }
+    }
 
 }
