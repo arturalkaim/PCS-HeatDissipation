@@ -15,7 +15,7 @@ int main(int argc, char *argv[]){
 	int n,i,j;
 
 	if(argc<=1) {
-	        printf("You did not feed me arguments, I will die now :( ...");
+	        printf("Arg1 Max Array Size");
 	        exit(1);
 	     }  //otherwise continue on our merry way....
 	      n = atoi(argv[1]);
@@ -25,7 +25,18 @@ int main(int argc, char *argv[]){
 	int* aRand = (int*) malloc(n*sizeof(int));
 
 	int* b = (int*) malloc(n*sizeof(int));
-	#include "mergeSortSeq.c"
+	int const numbArrays = 10;
+	int* arrays[numbArrays];
+	int* copies[numbArrays];
+	int sizes[numbArrays];
+	for(i=0; i < numbArrays; i++){
+		//n=Cenas
+		n = 100000;//TODO
+		arrays[i]=(int*) malloc(n*sizeof(int));
+		sizes[i]=n;
+	}
+
+	#include "multiMergeSortSeq.c"
 
 	//FILE * inputFile;
 	int teste;
@@ -37,7 +48,7 @@ int main(int argc, char *argv[]){
 		exit(-1);
 	}*/
 
-	for(i=0; i<n; i++){
+/*	for(i=0; i<n; i++){
 		aUp[i] = i;
 	}
 	for(j=0,i=n; i>0; j++, i--){
@@ -46,13 +57,9 @@ int main(int argc, char *argv[]){
 	for(i=0; i<n; i++){
 		aRand[i]=rand();
 	}
+*/
 
-
-	TopDownMergeSort(aUp, b, n);
-	TopDownMergeSort(aDown, b, n);
-	TopDownMergeSort(aRand, b, n);
-
-	int i = 0;
+	SortSeveral(arrays,copies,sizes,numbArrays);
 	/*for (i = 0; i < 10; ++i) {
 		printf("%d ", a3[i] );
 	}*/
