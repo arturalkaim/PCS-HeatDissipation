@@ -25,7 +25,7 @@ int main(int argc, char *argv[]){
 	int sizes[numbArrays];
 	for(i=0; i < numbArrays; i++){
 		//n=Cenas
-		//n = 100000;
+		//n = 100000;//TODO
 		arrays[i]=(int*) malloc(n*sizeof(int));
 		copies[i]=(int*) malloc(n*sizeof(int));
 		sizes[i]=n;
