@@ -10,7 +10,6 @@
 
 int main(int argc, char *argv[]){
 
-	srand(time(NULL));
 	int r = rand();
 	int n,i,j;
 
@@ -18,26 +17,24 @@ int main(int argc, char *argv[]){
 	        printf("Arg1 Max Array Size");
 	        exit(1);
 	     }  //otherwise continue on our merry way....
-	      n = atoi(argv[1]);
+	n = atoi(argv[1]);
 
-	int* aUp = (int*) malloc(n*sizeof(int));
-	int* aDown = (int*) malloc(n*sizeof(int));
-	int* aRand = (int*) malloc(n*sizeof(int));
-
-	int* b = (int*) malloc(n*sizeof(int));
 	int const numbArrays = 10;
 	int* arrays[numbArrays];
 	int* copies[numbArrays];
 	int sizes[numbArrays];
 	for(i=0; i < numbArrays; i++){
 		//n=Cenas
-		n = 100000;//TODO
+		//n = 100000;
 		arrays[i]=(int*) malloc(n*sizeof(int));
+		copies[i]=(int*) malloc(n*sizeof(int));
 		sizes[i]=n;
+		for(j=0; j<n;j++){
+
+			arrays[i][j]=rand();
+		}
 	}
-
 	#include "multiMergeSortSeq.c"
-
 	//FILE * inputFile;
 	int teste;
 	//inputFile = fopen(argv[1], "r");
