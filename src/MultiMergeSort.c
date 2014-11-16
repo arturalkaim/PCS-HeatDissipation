@@ -10,7 +10,7 @@ void TopDownMerge(int* A, int iBegin, int iMiddle, int iEnd, int* B) {
 	// While there are elements in the left or right runs
 	int j;
 
-//#pragma omp parallel for firstprivate(i0, i1)
+#pragma omp parallel for firstprivate(i0, i1)
 	for (j = iBegin; j < iEnd; j++) {
 		// If left run head exists and is <= existing right run head.
 		if (i0 < iMiddle && (i1 >= iEnd || A[i0] <= A[i1])) {
@@ -26,7 +26,7 @@ void TopDownMerge(int* A, int iBegin, int iMiddle, int iEnd, int* B) {
 
 void CopyArray(int* B, int iBegin, int iEnd, int* A) {
 	int k;
-//#pragma omp parallel for
+#pragma omp parallel for
 	for (k = iBegin; k < iEnd; k++)
 		A[k] = B[k];
 }
@@ -61,6 +61,10 @@ void TopDownSplitMerge(int* A, int iBegin, int iEnd, int* B) {
 
 	timeAuxAfter = omp_get_wtime(); //compute the result
 
+
+
+	timeBefore += timeAuxAfter-timeAuxBefore;
+
 }
 
 /*void printTimeOutFile(double time){
@@ -78,11 +82,17 @@ void TopDownMergeSort(int* A, int* B, int n) {
 	timeAfter = omp_get_wtime();
 
 	//end = omp_get_wtime();
-	timeBefore += timeAuxAfter-timeAuxBefore;
 	time = timeAfter - timeBefore;
 	printf("%f\n", time);
 	//printTimeOutFile(end - start);
 
 
-}
+void SortSeveral(int* A, int* B, int* n, int total){
 
+	int i;
+#pragma omp parallel for
+	for(i=0; i < total; i++){
+		TopDownMergeSort(A[i], B[i], n[i]);
+
+	}
+}
