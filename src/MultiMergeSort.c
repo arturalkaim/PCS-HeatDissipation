@@ -10,7 +10,7 @@ void TopDownMerge(int* A, int iBegin, int iMiddle, int iEnd, int* B) {
 	// While there are elements in the left or right runs
 	int j;
 
-#pragma omp parallel for firstprivate(i0, i1)
+#pragma omp for //firstprivate(i0, i1)
 	for (j = iBegin; j < iEnd; j++) {
 		// If left run head exists and is <= existing right run head.
 		if (i0 < iMiddle && (i1 >= iEnd || A[i0] <= A[i1])) {
@@ -26,7 +26,7 @@ void TopDownMerge(int* A, int iBegin, int iMiddle, int iEnd, int* B) {
 
 void CopyArray(int* B, int iBegin, int iEnd, int* A) {
 	int k;
-#pragma omp parallel for
+#pragma omp for 
 	for (k = iBegin; k < iEnd; k++)
 		A[k] = B[k];
 }
@@ -39,31 +39,36 @@ void TopDownSplitMerge(int* A, int iBegin, int iEnd, int* B) {
 	// recursively split runs into two halves until run size == 1,
 	// then merge them and return back up the call chain
 	int iMiddle = (iEnd + iBegin) / 2; // iMiddle = mid point, it keeps the lower, doesn't round up
-#pragma omp parallel sections num_threads(2)
+#pragma omp parallel
 	{
+//	#pragma omp sections 
+//	{
+		#pragma omp single
+		{
 //		printf("Num threads inside %d \n", omp_get_num_threads());
-#pragma omp section
+#pragma omp task //section 
 		{
 			TopDownSplitMerge(A, iBegin, iMiddle, B); // split / merge left
 		}
 
-#pragma omp section
+#pragma omp task// section
 		{
 			TopDownSplitMerge(A, iMiddle, iEnd, B); // split / merge right half
 		}
-	}
+	
+#pragma omp taskwait
+}
 
-
-    timeAuxBefore = omp_get_wtime(); //get the time before the Sequential part
+    //timeAuxBefore = omp_get_wtime(); //get the time before the Sequential part
 
     TopDownMerge(A, iBegin, iMiddle, iEnd, B);  // merge the two half runs
 	CopyArray(B, iBegin, iEnd, A);  // copy the merged runs back to A
+}
+	//timeAuxAfter = omp_get_wtime(); //compute the result
 
-	timeAuxAfter = omp_get_wtime(); //compute the result
 
 
-
-	timeBefore += timeAuxAfter-timeAuxBefore;
+	//timeBefore += timeAuxAfter-timeAuxBefore;
 
 }
 
@@ -75,24 +80,21 @@ void TopDownSplitMerge(int* A, int iBegin, int iEnd, int* B) {
 }*/
 
 void TopDownMergeSort(int* A, int* B, int n) {
-	//printf("NUM THREADS %d\n", omp_get_num_threads());
-	//start = -omp_get_wtime();
-	timeBefore = omp_get_wtime();
 	TopDownSplitMerge(A, 0, n, B);
-	timeAfter = omp_get_wtime();
+}
+
+void SortSeveral(int** A, int** B, int* n, int total){
+
+	int i;
+	timeBefore = omp_get_wtime();
+//#pragma omp parallel for schedule(dynamic,1) //num_threads(4) //private(timeBefore, timeAfter, timeAuxBefore, timeAuxAfter, time)
+	for(i=0; i < total; i++){
+		TopDownMergeSort((A[i]), B[i], n[i]);
+	}
+
+		timeAfter = omp_get_wtime();
 
 	//end = omp_get_wtime();
 	time = timeAfter - timeBefore;
 	printf("%f\n", time);
-	//printTimeOutFile(end - start);
-
-
-void SortSeveral(int* A, int* B, int* n, int total){
-
-	int i;
-#pragma omp parallel for
-	for(i=0; i < total; i++){
-		TopDownMergeSort(A[i], B[i], n[i]);
-
-	}
 }

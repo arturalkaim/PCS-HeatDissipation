@@ -209,7 +209,7 @@ size_t i, j;
     free(g1);
 
     
-    gettimeofday(&after1, NULL);
+    gettimeofday(&after, NULL);
     r->time = (double)(after1.tv_sec - before1.tv_sec) + 
         (double)(after1.tv_usec - before1.tv_usec) / 1e6;
 
